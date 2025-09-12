@@ -21,13 +21,19 @@ namespace CppToPy_Win32 {
         unsigned char* payload_2;
     };
 
+    // Used to singal that this process is ready
     const std::string ready_str = "ready";
+    // Used when the process is being setup.
     const std::string handshake_str = "handshake";
+    // Used when the the process is quit without Ctrl+C
+    const std::string quit_str = "quit";
 
     class cpp_data_transfer_manager
     {
         private:
             std::map<std::string, payload_function> callback_lookup_map;
+            volatile thread_shared_data* t_data;
+            void set_payload_values(std::string data_id, uint32_t data_size, unsigned char* data_payload);
         public:
             // If the connection has been established, if not trying to post a payload will cause it to error.
             bool is_connected();
@@ -42,7 +48,7 @@ namespace CppToPy_Win32 {
             cpp_data_transfer_manager();
             ~cpp_data_transfer_manager();
     };
-
+    
     // You'll need a ref back so that you can get access to any avalible data
     void thread_export(thread_shared_data* shared_data);
     // You need a ref to the parent to get the data callbacks.
