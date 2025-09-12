@@ -66,26 +66,3 @@ payload_function cpp_data_transfer_manager::get_callback(std::string id){
     if (callback_lookup_map.find(id) == callback_lookup_map.end()) return nullptr;
     return callback_lookup_map[id];
 }
-
-// Export Process
-// Setup pipe to python
-// Begin loop
-// Check 1
-// Check 2
-// Repeat
-// If 1 (or 2)
-// Pull and send data
-// Flip bool
-void thread_export()
-
-
-// Import Process
-// Loop
-// Hang on Pipe
-// Get callback
-// Does callback exist?
-
-// Useful Refs:
-// - https://learn.microsoft.com/en-us/windows/win32/ipc/multithreaded-pipe-server
-// - https://learn.microsoft.com/en-us/windows/win32/ipc/named-pipe-client
-// - https://stackoverflow.com/questions/26561604/create-windows-named-pipe-in-c

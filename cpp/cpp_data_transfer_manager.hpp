@@ -53,7 +53,6 @@ namespace CppToPy_Win32 {
     void thread_export(thread_shared_data* shared_data);
     // You need a ref to the parent to get the data callbacks.
     void thread_import(cpp_data_transfer_manager* parent);
-    
 }
 
 #endif
