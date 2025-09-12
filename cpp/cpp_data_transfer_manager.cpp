@@ -50,7 +50,7 @@ bool cpp_data_transfer_manager::is_connected(){
 // place paylod info in shared data
 // flip boolean
 void cpp_data_transfer_manager::post_payload(std::string data_id, uint32_t data_size, unsigned char* data_payload){
-    if(t_data->other_program_ready) throw new exception("Error: You cannot sent messages untill the other program is ready. Use is_connected() to check.");
+    if(t_data->other_program_ready) throw "Error: You cannot sent messages until the other program is ready. Use is_connected() to check.";
 
 }
 
