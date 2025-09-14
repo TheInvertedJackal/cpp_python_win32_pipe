@@ -1,33 +1,51 @@
 # From: https://stackoverflow.com/questions/48542644/python-and-windows-named-pipes
+# FIRST STEP DONE! Connection established!
 
 import time
 import sys
 import win32pipe, win32file, pywintypes
 
+def pipe_client():
+    print("pipe client")
+    quit = False
 
-def pipe_server():
-    print("pipe server")
-    count = 0
-    pipe = win32pipe.CreateNamedPipe(
-        r'\\.\pipe\python_to_cpp_pipe',
-        win32pipe.PIPE_ACCESS_DUPLEX,
-        win32pipe.PIPE_TYPE_MESSAGE | win32pipe.PIPE_READMODE_MESSAGE | win32pipe.PIPE_WAIT,
-        1, 65536, 65536,
-        0,
-        None)
-    try:
-        print("waiting for client")
-        win32pipe.ConnectNamedPipe(pipe, None)
-        print("got client")
-
-        while count < 10:
-            print(f"writing message {count}")
-            # convert to bytes
-            some_data = str.encode(f"{count}")
-            win32file.WriteFile(pipe, some_data)
-            time.sleep(1)
-            count += 1
-
-        print("finished now")
-    finally:
-        win32file.CloseHandle(pipe)
+    while not quit:
+        try:
+            handle = win32file.CreateFile(
+                r'\\.\pipe\cpp_to_python_pipe',
+                win32file.GENERIC_READ | win32file.GENERIC_WRITE,
+                0,
+                None,
+                win32file.OPEN_EXISTING,
+                win32file.FILE_ATTRIBUTE_NORMAL,
+                None
+            )
+            try:
+                err, bytes_written = win32file.WriteFile(handle, b"\x32\xf5\xe4\x97message_id------Hello from Python! I did a message, but I can't auto encode things :'(\x89\xe4\xaa\xb3")
+                if err == 0:  # No error
+                    print(f"Sent {bytes_written} bytes to the pipe.")
+                    time.sleep(5)
+                else:
+                    print(f"Error writing to pipe: {err}")
+                    time.sleep(5)
+            except win32file.error as e:
+                print(f"Error writing to pipe: {e}")
+                time.sleep(5)
+            
+            # print ("Setting the Pipe handle state...")
+            # res = win32pipe.SetNamedPipeHandleState(handle, win32pipe.PIPE_READMODE_MESSAGE, 10, None)
+            # print("Set!")
+            # if res == 0:
+            #     print(f"SetNamedPipeHandleState return code: {res}")
+            # while True:
+            #     print("Message Preped!")
+            #     win32file.WriteFile(handle ,"Hello from python!")
+            #     print("Message Sent!")
+            #     time.sleep(5)
+        except pywintypes.error as e:
+            if e.args[0] == 2:
+                print("no pipe, trying again in a sec")
+                time.sleep(1)
+            elif e.args[0] == 109:
+                print("broken pipe, bye bye")
+                quit = True

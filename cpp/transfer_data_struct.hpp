@@ -3,11 +3,17 @@
 
 #include <string>
 
-struct transfer_data_struct
+struct packet_message
 {
     std::string data_id;
-    uint32_t data_size;
-    uint8_t* data_payload;
+    int data_size;
+    unsigned char* data_payload;
+};
+
+struct byte_string
+{
+    int size;
+    unsigned char* data_str;
 };
 
 #endif
