@@ -35,6 +35,8 @@ namespace cpp_to_python_win32pipe {
     // Class is created and managed within thread
     class data_import_manager {
         private:
+            int next_message_index = shared_msg_buffer_size - 1;
+            shared_data* message_box = nullptr;
             HANDLE hPipe = 0;
             unsigned char buffer[BUFFER_SIZE];
             DWORD dwRead = 0;
@@ -43,14 +45,13 @@ namespace cpp_to_python_win32pipe {
             packet_message* decode_message(int size, unsigned char* data);
             void check_for_client();
             void read_messages();
+            void place_message(packet_message *);
         public:
-            // TODO: Add a shared memory struct
-            data_import_manager();
+            data_import_manager(shared_data* message_box);
     };
     
     // Pull Message (Async with shared memeory)
-    // TODO: Add a shared memory struct
-    void threaded_data_import();
+    void threaded_data_import(shared_data* message_box);
 
     void print_log_message(std::string message);
 

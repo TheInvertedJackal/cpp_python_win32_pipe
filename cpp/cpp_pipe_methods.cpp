@@ -15,7 +15,8 @@ void cpp_to_python_win32pipe::print_error_and_crash(std::string error_message){
 
 // Data Importing
 
-cpp_to_python_win32pipe::data_import_manager::data_import_manager(){
+cpp_to_python_win32pipe::data_import_manager::data_import_manager(shared_data* message_box){
+    this->message_box = message_box;
     cpp_to_python_win32pipe::print_log_message("Creating Import Pipe");
     hPipe = CreateNamedPipe(TEXT("\\\\.\\pipe\\cpp_to_python_pipe"),
                             PIPE_ACCESS_DUPLEX,
@@ -48,15 +49,38 @@ void cpp_to_python_win32pipe::data_import_manager::read_messages(){
         packet_message* message = decode_message((int) dwRead, buffer);
 
         // Do something with said message!
-        std::cout << "ID: " << message->data_id << std::endl;
-        std::cout << "Content: " << std::endl;
-        for(int i = 0; i < message->data_size ; i++){
-            std::cout << message->data_payload[i];
-        }
-        std::cout << std::endl;
+        place_message(message);
 
-        delete[] message->data_payload;
-        delete message;
+        // std::cout << "ID: " << message->data_id << std::endl;
+        // std::cout << "Content: " << std::endl;
+        // for(int i = 0; i < message->data_size ; i++){
+        //     std::cout << message->data_payload[i];
+        // }
+        // std::cout << std::endl;
+
+        // delete[] message->data_payload;
+        // delete message;
+    }
+}
+
+void cpp_to_python_win32pipe::data_import_manager::place_message(packet_message* message){
+    bool message_placed = false;
+    while (!message_placed){
+        // Check to see if box is being read
+        if(message_box->locks[next_message_index].try_lock()){
+            // If we have a free box
+            if(!message_box->data_to_read[next_message_index]){
+                message_box->messages[next_message_index] = message;
+                message_box->data_to_read[next_message_index] = true;
+                message_box->avalible_messages += 1;
+                message_placed = true;
+            }
+            message_box->locks[next_message_index].unlock();
+        }
+        // Move onto the next one
+        next_message_index -= 1;
+        // Possible reset
+        if (next_message_index < 0) next_message_index = shared_msg_buffer_size - 1;
     }
 }
 
@@ -101,8 +125,8 @@ packet_message* cpp_to_python_win32pipe::data_import_manager::decode_message(int
     return retval;
 }
 
-void cpp_to_python_win32pipe::threaded_data_import(){
-    cpp_to_python_win32pipe::data_import_manager manager = cpp_to_python_win32pipe::data_import_manager();
+void cpp_to_python_win32pipe::threaded_data_import(shared_data* message_box){
+    cpp_to_python_win32pipe::data_import_manager manager = cpp_to_python_win32pipe::data_import_manager(message_box);
 }
 
 // Data Exporting
