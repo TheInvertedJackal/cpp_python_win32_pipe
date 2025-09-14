@@ -1,17 +1,20 @@
 # From: https://stackoverflow.com/questions/48542644/python-and-windows-named-pipes
 # FIRST STEP DONE! Connection established!
 
-import time
-import sys
 import win32pipe, win32file, pywintypes
+from python.py_data_encoder import data_encoder
+from python.python_log import print_log
 
-def pipe_client():
-    print("pipe client")
-    quit = False
+class data_export_manager:
+    h_pipe = 0
+    connected = False
 
-    while not quit:
+    def __init__(self):
+        self.retry_connection()
+
+    def retry_connection(self):
         try:
-            handle = win32file.CreateFile(
+            self.h_pipe = win32file.CreateFile(
                 r'\\.\pipe\cpp_to_python_pipe',
                 win32file.GENERIC_READ | win32file.GENERIC_WRITE,
                 0,
@@ -20,32 +23,27 @@ def pipe_client():
                 win32file.FILE_ATTRIBUTE_NORMAL,
                 None
             )
-            try:
-                err, bytes_written = win32file.WriteFile(handle, b"\x32\xf5\xe4\x97message_id------Hello from Python! I did a message, but I can't auto encode things :'(\x89\xe4\xaa\xb3")
-                if err == 0:  # No error
-                    print(f"Sent {bytes_written} bytes to the pipe.")
-                    time.sleep(5)
-                else:
-                    print(f"Error writing to pipe: {err}")
-                    time.sleep(5)
-            except win32file.error as e:
-                print(f"Error writing to pipe: {e}")
-                time.sleep(5)
-            
-            # print ("Setting the Pipe handle state...")
-            # res = win32pipe.SetNamedPipeHandleState(handle, win32pipe.PIPE_READMODE_MESSAGE, 10, None)
-            # print("Set!")
-            # if res == 0:
-            #     print(f"SetNamedPipeHandleState return code: {res}")
-            # while True:
-            #     print("Message Preped!")
-            #     win32file.WriteFile(handle ,"Hello from python!")
-            #     print("Message Sent!")
-            #     time.sleep(5)
+            self.connected = True
         except pywintypes.error as e:
             if e.args[0] == 2:
-                print("no pipe, trying again in a sec")
-                time.sleep(1)
+                self.connected = False
             elif e.args[0] == 109:
-                print("broken pipe, bye bye")
-                quit = True
+                print_log("Major Error: Pipe is broken.")
+                exit(0)
+
+    def is_connected(self):
+        return self.connected
+    
+    def export_data(self, id, byte_str):
+        if isinstance(id, str):
+            id = id.encode("utf-8")
+        encoded_data = data_encoder(id, byte_str)
+        try:
+            err, bytes_written = win32file.WriteFile(self.h_pipe, encoded_data)
+            if err == 0:  # No error
+                print(f"Sent {bytes_written} bytes to the pipe.")
+            else:
+                print_log(f"Error writing to pipe: {err}")
+                return 0
+        except win32file.error as e:
+            print_log(f"Error writing to pipe: {e}")

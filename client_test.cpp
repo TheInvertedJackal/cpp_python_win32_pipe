@@ -10,10 +10,13 @@ main(){
     data_export_manager exporter = data_export_manager();
     std::string message = "Hello!, my name is David. I'm on C++, but I'd love to talk to you python! Please return my call, I miss you python, I miss you dearly.";
     while(!exporter.is_connected()){
-        cpp_to_python_win32pipe::print_log_message("No connection to python client, retrying in 1 second...");
+        cpp_to_python_win32pipe::print_log_message("No connection to python server, retrying in 1 second...");
         std::this_thread::sleep_for(std::chrono::seconds(1));
         exporter.retry_connection();
     }
     exporter.export_data("hello_test", message.length(), (unsigned char*) message.c_str());
+    while(true){
+        // Hang until Ctrl + C
+    }
     return 0;
 }

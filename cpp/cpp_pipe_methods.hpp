@@ -47,9 +47,6 @@ namespace cpp_to_python_win32pipe {
             // TODO: Add a shared memory struct
             data_import_manager();
     };
-
-    // Post Message
-    void data_export(std::string id, int size, unsigned char* data);
     
     // Pull Message (Async with shared memeory)
     // TODO: Add a shared memory struct
