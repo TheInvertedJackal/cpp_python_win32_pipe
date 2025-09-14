@@ -50,22 +50,19 @@ void cpp_to_python_win32pipe::data_import_manager::read_messages(){
 
         // Do something with said message!
         place_message(message);
-
-        // std::cout << "ID: " << message->data_id << std::endl;
-        // std::cout << "Content: " << std::endl;
-        // for(int i = 0; i < message->data_size ; i++){
-        //     std::cout << message->data_payload[i];
-        // }
-        // std::cout << std::endl;
-
-        // delete[] message->data_payload;
-        // delete message;
     }
 }
 
 void cpp_to_python_win32pipe::data_import_manager::place_message(packet_message* message){
     bool message_placed = false;
+    int trys = 0;
     while (!message_placed){
+        if(trys > max_msg_placement_tries){
+            print_log_message("Warning, message dropped!");
+            delete[] message->data_payload;
+            delete message;
+            break;
+        }
         // Check to see if box is being read
         if(message_box->locks[next_message_index].try_lock()){
             // If we have a free box
@@ -79,6 +76,7 @@ void cpp_to_python_win32pipe::data_import_manager::place_message(packet_message*
         }
         // Move onto the next one
         next_message_index -= 1;
+        trys += 1;
         // Possible reset
         if (next_message_index < 0) next_message_index = shared_msg_buffer_size - 1;
     }

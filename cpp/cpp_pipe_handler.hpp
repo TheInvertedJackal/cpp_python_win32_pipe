@@ -8,7 +8,7 @@
 using namespace cpp_to_python_win32pipe;
 
 namespace cpp_to_python_win32pipe{
-
+    
     class cpp_to_python{
         private:
             shared_data* message_box = nullptr;
