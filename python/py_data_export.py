@@ -15,7 +15,7 @@ class data_export_manager:
     def retry_connection(self):
         try:
             self.h_pipe = win32file.CreateFile(
-                r'\\.\pipe\cpp_to_python_pipe',
+                r'\\.\pipe\python_to_cpp_pipe',
                 win32file.GENERIC_READ | win32file.GENERIC_WRITE,
                 0,
                 None,
@@ -41,7 +41,7 @@ class data_export_manager:
         try:
             err, bytes_written = win32file.WriteFile(self.h_pipe, encoded_data)
             if err == 0:  # No error
-                print(f"Sent {bytes_written} bytes to the pipe.")
+                print_log(f"Sent {bytes_written} bytes to C++.")
             else:
                 print_log(f"Error writing to pipe: {err}")
                 return 0

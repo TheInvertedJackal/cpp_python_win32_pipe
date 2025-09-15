@@ -1,11 +1,13 @@
 #include <iostream>
+#include <thread>
+#include <chrono>
 
 #include "cpp_pipe_methods.hpp"
 
 // Base from: https://stackoverflow.com/questions/26561604/create-windows-named-pipe-in-c
 
 void cpp_to_python_win32pipe::print_log_message(std::string message){
-    std::cout << "[C++ Side] - " << message << std::endl;
+    std::cout << "[C++ Side] - " << message << std::endl << std::flush;
 }
 
 void cpp_to_python_win32pipe::print_error_and_crash(std::string error_message){
@@ -18,7 +20,7 @@ void cpp_to_python_win32pipe::print_error_and_crash(std::string error_message){
 cpp_to_python_win32pipe::data_import_manager::data_import_manager(shared_data* message_box){
     this->message_box = message_box;
     cpp_to_python_win32pipe::print_log_message("Creating Import Pipe");
-    hPipe = CreateNamedPipe(TEXT("\\\\.\\pipe\\cpp_to_python_pipe"),
+    hPipe = CreateNamedPipe(TEXT("\\\\.\\pipe\\python_to_cpp_pipe"),
                             PIPE_ACCESS_DUPLEX,
                             PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,   // FILE_FLAG_FIRST_PIPE_INSTANCE is not needed but forces CreateNamedPipe(..) to fail if the pipe already exists...
                             1,
@@ -130,7 +132,6 @@ void cpp_to_python_win32pipe::threaded_data_import(shared_data* message_box){
 // Data Exporting
 
 cpp_to_python_win32pipe::data_export_manager::data_export_manager(){
-    retry_connection();
 }
 
 cpp_to_python_win32pipe::data_export_manager::~data_export_manager(){
@@ -142,24 +143,29 @@ bool cpp_to_python_win32pipe::data_export_manager::is_connected(){
 }
 
 void cpp_to_python_win32pipe::data_export_manager::retry_connection(){
-    hPipe = CreateFile(TEXT("\\\\.\\pipe\\python_to_cpp_pipe"), // Name
+    if(is_connected()) return;
+    hPipe = CreateFile(TEXT("\\\\.\\pipe\\cpp_to_python_pipe"), // Name
                    GENERIC_READ | GENERIC_WRITE,            // Read and Write
                    0,                                       // Does not share
                    NULL,                                    // Default Security
                    OPEN_EXISTING,                           // Opens an existing pipe
                    0,                                       // Default Attributes
                    NULL);
+    std::cout << "H Value of: " << hPipe << std::endl;
 }
 
 void cpp_to_python_win32pipe::data_export_manager::export_data(std::string id, int size, unsigned char* data){
+    cpp_to_python_win32pipe::print_log_message("Sending Message from C++ to Python.");
     byte_string* to_send = encode_message(id, size, data);
     if (hPipe != INVALID_HANDLE_VALUE)
     {
         WriteFile(hPipe,
                   to_send->data_str,   // Message
-                  to_send->size,               // = length of string + terminating '\0' !!!
+                  to_send->size,             
                   &dwWritten,       // Written Bytes
                   NULL);            // Not Overlapped
+        std::string status_msg = "Sent " + std::to_string(to_send->size) + " bytes to Python.";
+        cpp_to_python_win32pipe::print_log_message(status_msg);
         // Clean up byte Str
         delete[] to_send->data_str;
         delete to_send;

@@ -19,7 +19,7 @@ namespace cpp_to_python_win32pipe {
 
     class data_export_manager {
         private:
-            HANDLE hPipe = 0;
+            HANDLE hPipe = INVALID_HANDLE_VALUE;
             DWORD dwWritten = 0;
             // Encodes the message to a byte string value
             byte_string* encode_message(std::string id, int size, unsigned char* data);
@@ -30,6 +30,7 @@ namespace cpp_to_python_win32pipe {
             bool is_connected();
             // Attempt to reconnect to python server
             void retry_connection();
+            // THIS DOES NOT AUTO CONNECT ON OPEN! You'll need to do that yourself.
             data_export_manager();
             ~data_export_manager();
     };

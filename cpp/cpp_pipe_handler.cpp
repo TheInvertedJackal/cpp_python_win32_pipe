@@ -11,13 +11,13 @@ cpp_to_python::cpp_to_python(){
         message_box->messages[i] = nullptr;
         message_box->data_to_read[i] = false;
     }
-    
-    // Create in pipe (Thread)
-    std::thread importer_t(threaded_data_import, message_box);
-    importer_t.detach();
 
     // Create out Pipe
     exporter = data_export_manager();
+
+    // Create in pipe (Thread)
+    std::thread importer_t(threaded_data_import, message_box);
+    importer_t.detach();
 }
 
 std::vector<packet_message*>* cpp_to_python::pull_msgs(){
@@ -36,6 +36,7 @@ std::vector<packet_message*>* cpp_to_python::pull_msgs(){
 }
 
 std::vector<packet_message*>* cpp_to_python::check_msgs(){
+    // if(!exporter.is_connected()) print_error_and_crash("You need to be connected to python to read messages.");
     if(message_box->avalible_messages == 0) return nullptr;
     return pull_msgs();
 }
@@ -45,6 +46,7 @@ bool cpp_to_python::is_connected(){
 }
 
 void cpp_to_python::retry_connection(){
+    print_log_message("Retrying Connection");
     exporter.retry_connection();
 }
 

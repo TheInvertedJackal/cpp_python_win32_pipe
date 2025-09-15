@@ -11,6 +11,7 @@ int main(){
     while(true){
         // Try to connect if you can't sleep
         if(!to_from_py.is_connected()){
+            std::cout << "I'm not connected! Help!" << std::endl;
             std::this_thread::sleep_for(std::chrono::seconds(1));
             to_from_py.retry_connection();
         } else {
@@ -20,7 +21,6 @@ int main(){
                 msg_sent = true;
             }
         }
-
         // Try to read messages
         std::vector<packet_message*>* possible_msgs = to_from_py.check_msgs();
         if(possible_msgs){
