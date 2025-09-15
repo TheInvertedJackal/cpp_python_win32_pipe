@@ -14,6 +14,7 @@ cpp_to_python::cpp_to_python(){
 
     // Create out Pipe
     exporter = data_export_manager();
+    exporter.retry_connection();
 
     // Create in pipe (Thread)
     std::thread importer_t(threaded_data_import, message_box);
