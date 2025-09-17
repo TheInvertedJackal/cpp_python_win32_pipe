@@ -17,7 +17,7 @@ struct byte_string
     unsigned char* data_str;
 };
 
-const int shared_msg_buffer_size = 16;
+const int shared_msg_buffer_size = 128;
 
 struct shared_data{
     int avalible_messages;

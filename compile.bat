@@ -22,6 +22,14 @@ if "%1" == "dual" (
 )
 
 
+if "%1" == "test" (
+    @echo on
+    g++ cpp_load_test.cpp cpp\cpp_pipe_methods.cpp cpp\cpp_pipe_handler.cpp -o cpp_load
+    @echo off
+    goto exit
+)
+
+
 echo "The option %1 is not reconized!"
 
 :exit

@@ -1,7 +1,7 @@
 import threading
 from python.python_log import print_log
 
-reading_buffer_size = 16
+reading_buffer_size = 128
 max_retrys = 32
 
 class MessageBox:
@@ -22,7 +22,7 @@ class MessageBox:
         trys = 0
         while not message_placed:
             if trys > max_retrys:
-                print_log("Warning! Message has been droped due to lack of buffer space!")
+                print_log("Warning! Message has been dropped due to lack of buffer space!")
                 break
             if self.locks[self.next_place_buffer_index].acquire(blocking=False):
                 try:

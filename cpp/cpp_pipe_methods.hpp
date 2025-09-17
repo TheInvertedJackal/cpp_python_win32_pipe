@@ -11,7 +11,7 @@ namespace cpp_to_python_win32pipe {
     
     const int BUFFER_SIZE = 1024;
     const int magic_numbers_count = 4;
-    const int message_id_size = 16; // 16 + 1 for \0
+    const int message_id_size = 16; // 16 as
     const int max_msg_placement_tries = 32;
     const unsigned char prefix_magic_numbers[] = { 0x32, 0xf5, 0xe4, 0x97 };
     const unsigned char ending_magic_numbers[] = { 0x89, 0xe4, 0xaa, 0xb3 };
@@ -57,6 +57,8 @@ namespace cpp_to_python_win32pipe {
     void threaded_data_import(shared_data* message_box);
 
     void print_log_message(std::string message);
+
+    void print_error(std::string message);
 
     void print_error_and_crash(std::string message);
 }

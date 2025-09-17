@@ -5,11 +5,15 @@
 // Base from: https://stackoverflow.com/questions/26561604/create-windows-named-pipe-in-c
 
 void cpp_to_python_win32pipe::print_log_message(std::string message){
-    std::cout << "[C++ Side] - " << message << std::endl << std::flush;
+    // std::cout << "[C++ Side] - " << message << std::endl << std::flush;
+}
+
+void cpp_to_python_win32pipe::print_error(std::string message){
+    std::cerr << "[C++ Side] - " << message << std::endl;
 }
 
 void cpp_to_python_win32pipe::print_error_and_crash(std::string error_message){
-    std::cerr << "[C++ Side] - " << error_message << std::endl;
+    print_error(error_message);
     throw error_message;
 }
 
@@ -47,9 +51,10 @@ void cpp_to_python_win32pipe::data_import_manager::read_messages(){
         cpp_to_python_win32pipe::print_log_message("Message from Client recived.");
         // Read and decode message
         packet_message* message = decode_message((int) dwRead, buffer);
-
-        // Do something with said message!
-        place_message(message);
+        if(message){
+            // If the message could be read
+            place_message(message);
+        }
     }
 }
 
@@ -84,12 +89,18 @@ void cpp_to_python_win32pipe::data_import_manager::place_message(packet_message*
 
 packet_message* cpp_to_python_win32pipe::data_import_manager::decode_message(int size, unsigned char* data){
     int meta_data_size = magic_numbers_count * 2 + message_id_size; // First 4 + ID 16 + Last 4
-    if (size < meta_data_size) cpp_to_python_win32pipe::print_error_and_crash("Cannot decode a message that is less than 24 bytes!");
+    if (size < meta_data_size){
+        cpp_to_python_win32pipe::print_error("Cannot decode a message that is less than 24 bytes!");
+        return 0;
+    }
     int passed_bytes = 0;
 
     // Check if the first 4 bytes are the magic bytes
     for(int i = 0; i < cpp_to_python_win32pipe::magic_numbers_count; i++){
-        if(buffer[i] != prefix_magic_numbers[i]) cpp_to_python_win32pipe::print_error_and_crash("Prefix Numbers of Message were not correct");
+        if(buffer[i] != prefix_magic_numbers[i]){
+            cpp_to_python_win32pipe::print_error("Prefix Numbers of Message were not correct");
+            return 0;
+        }
     }
     passed_bytes += cpp_to_python_win32pipe::magic_numbers_count;
 
@@ -112,7 +123,10 @@ packet_message* cpp_to_python_win32pipe::data_import_manager::decode_message(int
     
     // Check final 4 bytes
     for(int i = 0; i < cpp_to_python_win32pipe::magic_numbers_count; i++){
-        if(buffer[passed_bytes + i] != ending_magic_numbers[i]) cpp_to_python_win32pipe::print_error_and_crash("Ending Numbers of Message were not correct");
+        if(buffer[passed_bytes + i] != ending_magic_numbers[i]){
+            cpp_to_python_win32pipe::print_error_and_crash("Ending Numbers of Message were not correct");
+            return 0;
+        }
     }
 
     // Return struct!
@@ -149,7 +163,6 @@ void cpp_to_python_win32pipe::data_export_manager::retry_connection(){
                    OPEN_EXISTING,                           // Opens an existing pipe
                    0,                                       // Default Attributes
                    NULL);
-    std::cout << "H Value of: " << hPipe << std::endl;
 }
 
 void cpp_to_python_win32pipe::data_export_manager::export_data(std::string id, int size, unsigned char* data){
