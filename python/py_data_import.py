@@ -1,7 +1,5 @@
 # From: https://stackoverflow.com/questions/48542644/python-and-windows-named-pipes
 
-import time
-import sys
 import win32pipe, win32file, pywintypes
 from python.py_msg_box import MessageBox
 from python.py_shared_encode_data import buffer_size

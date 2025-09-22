@@ -16,7 +16,6 @@ namespace cpp_to_python_win32pipe {
     const unsigned char prefix_magic_numbers[] = { 0x32, 0xf5, 0xe4, 0x97 };
     const unsigned char ending_magic_numbers[] = { 0x89, 0xe4, 0xaa, 0xb3 };
     
-
     class data_export_manager {
         private:
             HANDLE hPipe = INVALID_HANDLE_VALUE;
