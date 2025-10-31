@@ -21,7 +21,7 @@ namespace cpp_to_python_win32pipe{
             void send_msg(std::string id, int message_size, unsigned char* byte_message);
             // Returns 0 if no new messages, otherwise returns messages from python
             std::vector<packet_message*>* check_msgs();
-            // Retrys connecting to the C++ program.
+            // Retrys connecting to the Python program.
             void retry_connection();
             // Returns true if there's been a connection to python
             bool is_connected();
