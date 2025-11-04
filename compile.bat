@@ -16,7 +16,7 @@ if "%1" == "client" (
 
 if "%1" == "dual" (
     @echo on
-    g++ cpp_dual_test.cpp cpp\cpp_pipe_methods.cpp cpp\cpp_pipe_handler.cpp cpp\cpp_thead_safe_queue.cpp cpp\cpp_message_sorter.cpp -o cpp_dual
+    g++ cpp_dual_test.cpp cpp\cpp_pipe_methods.cpp cpp\cpp_pipe_handler.cpp cpp\cpp_thead_safe_queue.cpp cpp\cpp_msg_handler_wrapper.cpp -o cpp_dual
     @echo off
     goto exit
 )

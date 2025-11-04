@@ -1,4 +1,4 @@
-#include "cpp_message_sorter.hpp"
+#include "cpp_msg_handler_wrapper.hpp"
 #include "cpp_thead_safe_queue.hpp"
 #include <thread>
 #include <chrono>
@@ -15,39 +15,48 @@ void work_thread(bool* processing_messages, cpp_to_python* msg_receiver, map<str
         if(!msg_receiver->is_connected()) continue; // Do not process messages if we are not connected
         std::vector<packet_message*>* msgs = msg_receiver->check_msgs();
         if(msgs == nullptr) continue; // No msgs to process
-        cout << "Got MSG" << endl;
         for(auto msg = msgs->begin(); msg != msgs->end(); ++msg){
             string id = (*msg)->data_id;
             if(listeners->find(id) != listeners->end()){
-                cout << "Sorted msg into " << id << endl << flush;
                 listeners->at(id)->push((*msg));
+            } else {
+                delete (*msg);
             }
         }
         delete msgs;
-        this_thread::sleep_for(chrono::milliseconds(5));
+        this_thread::sleep_for(chrono::milliseconds(3));
     }
 }
 
-void cpp_msg_sorter::process_messages(){
+void cpp_msg_handler_wrapper::process_messages(){
     thread work_thead(work_thread, &processing_messages, msg_receiver, &listeners);
     work_thead.detach();
 }
 
-cpp_msg_sorter::cpp_msg_sorter(cpp_to_python* msg_rec) : 
+cpp_msg_handler_wrapper::cpp_msg_handler_wrapper() :
     processing_messages{true} ,
+    internal_connection{true} ,
+    msg_receiver{new cpp_to_python()}{
+    process_messages();
+}
+
+cpp_msg_handler_wrapper::cpp_msg_handler_wrapper(cpp_to_python* msg_rec) : 
+    processing_messages{true} ,
+    internal_connection{false} ,
     msg_receiver{msg_rec}{
     process_messages();
 }
 
-cpp_msg_sorter::~cpp_msg_sorter(){
+cpp_msg_handler_wrapper::~cpp_msg_handler_wrapper(){
     processing_messages = false;
+    if(internal_connection) delete msg_receiver;
 }
 
-void cpp_msg_sorter::add_listener(string id){
+void cpp_msg_handler_wrapper::add_listener(string id){
     listeners[id] = new cpp_thead_safe_queue();
 }
 
-std::vector<packet_message*>* cpp_msg_sorter::get_message_for_id(string id){
+std::vector<packet_message*>* cpp_msg_handler_wrapper::get_message_for_id(string id){
     cpp_thead_safe_queue* queue = listeners.at(id);
     int total = 0;
     if(queue->count() == 0) return nullptr;
@@ -57,4 +66,16 @@ std::vector<packet_message*>* cpp_msg_sorter::get_message_for_id(string id){
         total++;
     }
     return ret_val;
+}
+
+void cpp_msg_handler_wrapper::retry_connection(){
+    msg_receiver->retry_connection();
+}
+
+bool cpp_msg_handler_wrapper::is_connected(){
+    return msg_receiver->is_connected();
+}
+
+void cpp_msg_handler_wrapper::send_msg(std::string id, int message_size, unsigned char* byte_message){
+    msg_receiver->send_msg(id, message_size, byte_message);
 }

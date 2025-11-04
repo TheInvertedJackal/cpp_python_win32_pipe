@@ -11,10 +11,14 @@ while True:
     else:
         if not sent_msg:
             manager.send_msg("print_str", b"PRINT THIS PRINT THIS NOW YOU FOOL!!!! AHALHJSDALKJDFLKJADESLQLKWEJHOLSKDFJHVLKH!~!!")
-            manager.send_msg("reset", b"If this prints, we have properly reset!")
             sent_msg = True
         msgs = manager.get_msgs()
         if msgs != 0:
             for msg in msgs:
+                if(msg["id"] == "reset"):
+                    print("Reseting...")
+                    time.sleep(2)
+                    print("Reset!")
+                    manager.send_msg("reset", b"If this prints, we have properly reset!")
                 print(msg)
     time.sleep(1)
