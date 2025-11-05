@@ -15,12 +15,15 @@ void work_thread(bool* processing_messages, cpp_to_python* msg_receiver, map<str
         if(!msg_receiver->is_connected()) continue; // Do not process messages if we are not connected
         std::vector<packet_message*>* msgs = msg_receiver->check_msgs();
         if(msgs == nullptr) continue; // No msgs to process
-        for(auto msg = msgs->begin(); msg != msgs->end(); ++msg){
-            string id = (*msg)->data_id;
+        for (int i = 0; i < msgs->size(); i++){
+            packet_message* msg = msgs->at(i);
+            string id = msg->data_id;
             if(listeners->find(id) != listeners->end()){
-                listeners->at(id)->push((*msg));
+                listeners->at(id)->push(msg);
             } else {
-                delete (*msg);
+                cout << "Print and dropped a message: " << msg->data_id << endl;
+                delete msg->data_payload;
+                delete msg;
             }
         }
         delete msgs;

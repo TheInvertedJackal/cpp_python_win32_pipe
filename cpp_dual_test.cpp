@@ -26,20 +26,19 @@ int main(){
                 sorter.send_msg("reset", rst_msg.length(), (unsigned char*)rst_msg.c_str());
                 msg_sent = true;
             }
-        }
-        
-        // Try to read messages
-        //std::vector<packet_message*>* possible_msgs = to_from_py.check_msgs();
-        std::vector<packet_message*>* possible_msgs = sorter.get_message_for_id("reset");
-        if(possible_msgs){
-            for (size_t i = 0; i < possible_msgs->size(); i++){
-                packet_message* msg = possible_msgs->at(i);
-                std::cout << std::string((const char*)msg->data_payload) << std::endl; 
-                // Cleanup!
-                delete[] msg->data_payload;
-                delete msg;
+            // Try to read messages
+            //std::vector<packet_message*>* possible_msgs = to_from_py.check_msgs();
+            std::vector<packet_message*>* possible_msgs = sorter.get_message_for_id("reset");
+            if(possible_msgs){
+                for (size_t i = 0; i < possible_msgs->size(); i++){
+                    packet_message* msg = possible_msgs->at(i);
+                    std::cout << std::string((const char*)msg->data_payload) << std::endl; 
+                    // Cleanup!
+                    delete[] msg->data_payload;
+                    delete msg;
+                }
+                delete possible_msgs;
             }
-            delete possible_msgs;
         }
     }
 }
