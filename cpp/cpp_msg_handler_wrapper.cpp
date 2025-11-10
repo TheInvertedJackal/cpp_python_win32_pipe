@@ -19,6 +19,7 @@ void work_thread(bool* processing_messages, cpp_to_python* msg_receiver, map<str
             packet_message* msg = msgs->at(i);
             string id = msg->data_id;
             if(listeners->find(id) != listeners->end()){
+                cout << "Added msg to ID: " << id << endl;
                 listeners->at(id)->push(msg);
             } else {
                 cout << "Print and dropped a message: " << msg->data_id << endl;
@@ -64,7 +65,7 @@ std::vector<packet_message*>* cpp_msg_handler_wrapper::get_message_for_id(string
     int total = 0;
     if(queue->count() == 0) return nullptr;
     std::vector<packet_message*>* ret_val = new std::vector<packet_message*>();
-    while(queue->count() > 0 || total <= MAX_CHECK_COUNT){
+    while(queue->count() > 0 && total <= MAX_CHECK_COUNT){
         ret_val->push_back(queue->pop());
         total++;
     }

@@ -10,7 +10,7 @@ int main(){
     //cpp_to_python to_from_py = cpp_to_python();
     cpp_msg_handler_wrapper sorter = cpp_msg_handler_wrapper();
     sorter.add_listener("reset");
-    sorter.add_listener("print_str");
+    //sorter.add_listener("print_str");
     bool msg_sent = false;
     while(true){
         // Try to connect if you can't sleep
@@ -30,14 +30,18 @@ int main(){
             //std::vector<packet_message*>* possible_msgs = to_from_py.check_msgs();
             std::vector<packet_message*>* possible_msgs = sorter.get_message_for_id("reset");
             if(possible_msgs){
+                std::cerr << "Got msgs!" << std::endl;
                 for (size_t i = 0; i < possible_msgs->size(); i++){
+                    std::cerr << "Looped: " << i << std::endl;
                     packet_message* msg = possible_msgs->at(i);
-                    std::cout << std::string((const char*)msg->data_payload) << std::endl; 
+                    std::cerr << std::string((const char*)msg->data_payload) << std::endl; 
                     // Cleanup!
                     delete[] msg->data_payload;
                     delete msg;
                 }
+                std::cerr << "Exited loop" << std::endl << std::flush;
                 delete possible_msgs;
+                std::cerr << "Cleaned up msgs!" << std::endl << std::flush;
             }
         }
     }
